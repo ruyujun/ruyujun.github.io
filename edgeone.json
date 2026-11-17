@@ -1,0 +1,5 @@
+{
+  "buildCommand": "node prepare-edgeone.mjs",
+  "installCommand": "node --version",
+  "outputDirectory": "site"
+}
