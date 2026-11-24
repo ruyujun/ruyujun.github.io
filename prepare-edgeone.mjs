@@ -1,4 +1,4 @@
-import {copyFileSync,mkdirSync,readdirSync,statSync} from 'node:fs';
+import {copyFileSync,mkdirSync,readdirSync,statSync,readFileSync,writeFileSync} from 'node:fs';
 import {join} from 'node:path';
 const dest='site/background';
 mkdirSync(dest,{recursive:true});
@@ -14,3 +14,19 @@ function verify(dir){
   }
 }
 verify('site');
+// The EdgeOne and GitHub deployments use separate build commands.
+const script = '<script defer src="/portfolio-analytics.js"></script>';
+function includeTracker(directory) {
+  for (const entry of readdirSync(directory,{withFileTypes:true})) {
+    const path=join(directory,entry.name);
+    if(entry.isDirectory()) includeTracker(path);
+    else if(entry.name.endsWith('.html')) {
+      const html=readFileSync(path,'utf8');
+      if(html.includes('<div id="root">') && !html.includes(script)) {
+        if(!html.includes('</head>')) throw Error('Missing document head in '+path);
+        writeFileSync(path,html.replace('</head>',script+'</head>'));
+      }
+    }
+  }
+}
+includeTracker('site');
